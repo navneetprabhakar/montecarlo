@@ -8,10 +8,15 @@ import com.navneet.models.CasinoResponse;
 import com.navneet.models.ServiceResponse;
 import com.navneet.service.SimulationService;
 import com.navneet.service.helper.SimulationServiceHelper;
+/**
+ * @author navneet
+ *
+ */
 @Service
 public class SimulationServiceImpl implements SimulationService {
 
 	@Autowired private SimulationServiceHelper simulationServiceHelper;
+	
 	@Override
 	public ServiceResponse<CasinoResponse> simulateCasino(CasinoRequest request) {
 		ServiceResponse<CasinoResponse> response=simulationServiceHelper.validateCasinoRequest(request);

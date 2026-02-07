@@ -2,44 +2,118 @@
 
 A small Spring Boot service that demonstrates Monte Carlo simulation techniques using a casino betting scenario as an example. The project models repeated bets to analyze likely outcomes, risk of ruin, and expected final balance under randomness.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Business Context](#business-context)
+- [Technologies](#technologies)
+- [Project Structure](#project-structure)
+- [Use Case: Casino Game](#use-case-casino-game)
+- [API Reference](#api-reference)
+- [Getting Started](#getting-started)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Overview
 
 Monte Carlo simulations model the probability of different outcomes in processes affected by random variables. This service provides a reusable simulation for simple betting games and is intended as a learning/demo project for simulation-based risk analysis.
 
-Technologies
-- Java
-- Spring Boot
-- Maven
-- Lombok
+## Business Context
 
-Business context
-- Use Monte Carlo simulations to estimate distributions of outcomes when analytical solutions are hard to obtain.
-- Example business uses: financial risk analysis, gambling/game-theory experiments, A/B testing with uncertainty, and decision support where randomness plays a strong role.
+Monte Carlo simulations are used to:
+- **Estimate distributions of outcomes** when analytical solutions are hard to obtain
+- **Analyze financial risk** through repeated sampling and randomness modeling
+- **Support decision-making** where uncertainty plays a strong role
 
-## Project layout (important files)
-- `src/main/java/com/navneet/controller/SimulationController.java` - REST controller exposing the simulation endpoint.
-- `src/main/java/com/navneet/service/impl/SimulationServiceImpl.java` - Service implementation that runs the simulation loop.
-- `src/main/java/com/navneet/service/helper/SimulationServiceHelper.java` - Helper with validation and per-round game logic.
-- `src/main/java/com/navneet/models/` - POJOs describing request & response shapes (`CasinoRequest`, `CasinoResponse`, `ServiceResponse`).
+Example use cases:
+- Financial risk analysis and portfolio simulation
+- Gambling and game-theory experiments
+- A/B testing with uncertainty quantification
+- Decision support systems under randomness
+- Risk of ruin analysis for betting and investment strategies
 
-## Use case: Casino Game (example)
+## Technologies
 
-Purpose: Run a sequence of independent bets and observe the player's end balance and whether/when they go bankrupt.
+- **Java** 17+
+- **Spring Boot** - Web framework
+- **Maven** - Build tool
+- **Lombok** - Reduce boilerplate code
 
-- Link (conceptual): https://towardsdatascience.com/the-house-always-wins-monte-carlo-simulation-eb82787da2a3
+## Project Structure
 
-API endpoint (from the code)
-- Method: POST
-- Path: /casino-game
-- Description: Runs a Monte Carlo simulation for the casino betting scenario.
+```
+montecarlo/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/navneet/
+│   │   │       ├── MonteCarloApplication.java         # Spring Boot entry point
+│   │   │       ├── controller/
+│   │   │       │   └── SimulationController.java       # REST controller exposing /casino-game endpoint
+│   │   │       ├── models/
+│   │   │       │   ├── CasinoRequest.java              # Request DTO for casino simulation
+│   │   │       │   ├── CasinoResponse.java             # Response DTO with simulation results
+│   │   │       │   ├── ServiceRequest.java             # Base service request interface
+│   │   │       │   └── ServiceResponse.java            # Generic service response wrapper
+│   │   │       └── service/
+│   │   │           ├── SimulationService.java          # Service interface
+│   │   │           ├── impl/
+│   │   │           │   └── SimulationServiceImpl.java   # Core simulation loop implementation
+│   │   │           └── helper/
+│   │   │               └── SimulationServiceHelper.java # Validation & per-round game logic
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       ├── static/                                 # Static assets
+│   │       └── templates/                              # Thymeleaf templates (if any)
+│   └── test/
+│       └── java/
+│           └── com/navneet/
+│               └── MonteCarloApplicationTests.java     # Unit tests
+├── target/                                             # Maven build output (compiled classes)
+├── pom.xml                                             # Maven project configuration
+├── mvnw & mvnw.cmd                                     # Maven wrapper scripts
+├── README.md                                           # This file
+├── LICENSE                                             # GNU General Public License v3.0
+└── HELP.md                                             # Additional help documentation
+```
 
-Request JSON (CasinoRequest)
-- amount (Double) — starting balance (must be > 0)
-- betAmount (Double) — stake per round (must be > 0 and <= amount)
-- winRatio (Double) — probability of winning a single bet (0.0 - 1.0)
-- gameSize (Integer) — number of rounds to simulate (must be >= 0)
+### Key Components
 
-Example request
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **REST Controller** | `controller/SimulationController.java` | Exposes POST `/casino-game` endpoint |
+| **Service Implementation** | `service/impl/SimulationServiceImpl.java` | Runs the core simulation loop for N rounds |
+| **Service Helper** | `service/helper/SimulationServiceHelper.java` | Input validation and per-round bet logic |
+| **Request/Response Models** | `models/` | Type-safe DTOs for API communication |
+
+## Use Case: Casino Game
+
+**Purpose:** Run a sequence of independent bets and observe the player's end balance and whether/when they go bankrupt.
+
+**Conceptual Link:** [The House Always Wins: Monte Carlo Simulation](https://towardsdatascience.com/the-house-always-wins-monte-carlo-simulation-eb82787da2a3)
+
+## API Reference
+
+### Endpoint: `/casino-game`
+
+| Attribute | Value |
+|-----------|-------|
+| **HTTP Method** | POST |
+| **Path** | `/casino-game` |
+| **Content-Type** | `application/json` |
+| **Description** | Runs a Monte Carlo simulation for the casino betting scenario |
+
+### Request Payload (CasinoRequest)
+
+| Field | Type | Constraints | Description |
+|-------|------|-----------|-------------|
+| `amount` | Double | > 0 | Starting balance for the simulation |
+| `betAmount` | Double | > 0 and <= `amount` | Stake placed per round |
+| `winRatio` | Double | 0.0 - 1.0 (inclusive) | Probability of winning a single bet |
+| `gameSize` | Integer | >= 0 | Number of rounds to simulate |
+
+**Example Request:**
 
 ```json
 {
@@ -50,14 +124,22 @@ Example request
 }
 ```
 
-Response JSON (ServiceResponse<CasinoResponse>)
-- status (String) — "success" or "failure"
-- message (String) — human-readable status/message
-- data (object|null) — on success, contains the CasinoResponse:
-  - endAmount (Double) — final amount after simulation (can be >, =, or < starting amount)
-  - bankruptRound (Integer|null) — the 0-based round index when the player first hit or fell below zero; null if never bankrupt
+### Response Payload (ServiceResponse<CasinoResponse>)
 
-Example success response
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | String | `"success"` or `"failure"` |
+| `message` | String | Human-readable status or error message |
+| `data` | CasinoResponse \| null | On success, contains simulation results; on failure, null |
+
+**CasinoResponse fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `endAmount` | Double | Final balance after all rounds (can be greater, equal, or less than starting amount) |
+| `bankruptRound` | Integer \| null | 0-based round index when bankrupt; `null` if never bankrupt |
+
+**Example Success Response:**
 
 ```json
 {
@@ -70,7 +152,7 @@ Example success response
 }
 ```
 
-Example failure response (validation error)
+**Example Failure Response (Validation Error):**
 
 ```json
 {
@@ -80,39 +162,53 @@ Example failure response (validation error)
 }
 ```
 
-Validation rules (from `SimulationServiceHelper`)
+### Validation Rules
+
+The following validation rules are enforced by `SimulationServiceHelper`:
+
 - `amount` must be provided and > 0
 - `betAmount` must be provided and > 0
 - `amount` must be >= `betAmount`
 - `winRatio` must be provided and between 0.0 and 1.0 (inclusive)
 - `gameSize` must be provided and >= 0
 
-If validation fails, the endpoint returns a `ServiceResponse` with `status: "failure"` and a helpful message.
+If validation fails, the endpoint returns a `ServiceResponse` with `status: "failure"` and a descriptive error message.
 
-## Build & run
+## Getting Started
 
-Prerequisites
-- JDK 17+ (or the JDK configured for this project)
-- Maven (or use the provided `mvnw` wrapper)
+### Prerequisites
 
-Build
+- **JDK 17** or higher
+- **Maven** 3.6+ (or use the provided `mvnw` wrapper)
+
+### Build
+
+Clone the repository and build the project:
 
 ```bash
 ./mvnw clean package
-# or
+```
+
+Or with Maven directly:
+
+```bash
 mvn clean package
 ```
 
-Run
+### Run
+
+Execute the compiled Spring Boot application:
 
 ```bash
-# run the Spring Boot jar produced in target/
 java -jar target/*.jar
 ```
 
-Or run the `com.navneet.MonteCarloApplication` from your IDE.
+Or run directly from your IDE:
+- Execute the `com.navneet.MonteCarloApplication` class
 
-Quick curl example
+The service will start on `http://localhost:8080` by default.
+
+### Quick Test with curl
 
 ```bash
 curl -s -X POST http://localhost:8080/casino-game \
@@ -120,26 +216,32 @@ curl -s -X POST http://localhost:8080/casino-game \
   -d '{"amount":1000.0,"betAmount":10.0,"winRatio":0.5,"gameSize":10000}'
 ```
 
-## Tests
+## Testing
 
-Run unit tests with
+Run the unit test suite:
 
 ```bash
 ./mvnw test
-# or
+```
+
+Or with Maven directly:
+
+```bash
 mvn test
 ```
 
 ## Contributing
 
-- Open an issue for bugs or feature requests.
-- Fork the repository, create a feature branch, add tests, and submit a pull request.
+- **Report Bugs**: Open an issue describing the bug with reproduction steps
+- **Feature Requests**: Open an issue describing the desired feature
+- **Pull Requests**: 
+  - Fork the repository
+  - Create a feature branch (`git checkout -b feature/your-feature`)
+  - Add tests for new functionality
+  - Commit your changes (`git commit -am 'Add new feature'`)
+  - Push to the branch (`git push origin feature/your-feature`)
+  - Open a pull request for review
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See `LICENSE` for the full text.
-
-
----
-
-If you'd like, I can also add a short sample integration test that calls the controller with a valid `CasinoRequest` and asserts a `success` response — would you like that?
+This project is licensed under the **GNU General Public License v3.0**. See the [`LICENSE`](./LICENSE) file for the full text.

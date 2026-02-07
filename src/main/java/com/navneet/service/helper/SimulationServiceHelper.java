@@ -1,14 +1,12 @@
 package com.navneet.service.helper;
 
-import java.util.Random;
-
-import org.springframework.stereotype.Component;
-
 import com.navneet.models.CasinoRequest;
 import com.navneet.models.CasinoResponse;
 import com.navneet.models.ServiceResponse;
-
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
+
+import java.util.Random;
 /**
  * @author navneet
  *

@@ -1,13 +1,12 @@
 package com.navneet.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.navneet.models.CasinoRequest;
 import com.navneet.models.CasinoResponse;
 import com.navneet.models.ServiceResponse;
 import com.navneet.service.SimulationService;
 import com.navneet.service.helper.SimulationServiceHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 /**
  * @author navneet
  *
@@ -27,6 +26,7 @@ public class SimulationServiceImpl implements SimulationService {
 				amount=simulationServiceHelper.runGame(i,amount, request.getBetAmount(), request.getWinRatio());
 				if(null==casinoResponse.getBankruptRound() && amount<=0) {
 					casinoResponse.setBankruptRound(i);
+					break;
 				}
 			}
 			casinoResponse.setEndAmount(amount);
